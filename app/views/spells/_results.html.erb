@@ -1,0 +1,7 @@
+<% if spells.blank? %>
+  <h3>No spells found! :(</h3>
+<% else %>
+  <% spells.each do |spell| %>
+    <h4><a href="<%= spell_details_path(spell) %>"><%= spell.name %> | <%= spell.school.name %> | <%= spell.character_classes.map(&:name).join(", ") %></a></h4>
+  <% end %>
+<% end %>

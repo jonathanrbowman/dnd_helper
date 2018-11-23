@@ -1,0 +1,9 @@
+<h1>Welcome! Look at all these spells:</h1>
+<input type="text" name="search_text" placeholder="Search Spells!" class="js-spell-search">
+<div class="js-spell-results">
+  <% if @spells.present? %>
+    <%= render "spells/results", @spells %>
+  <% else %>
+    <h3>Type to start searching!</h3>
+  <% end %>
+</div>

@@ -10,8 +10,9 @@ class Spell < ActiveRecord::Base
   searchkick
 
   def search_data
-    attributes.merge(
+    {
+      name: name,
       character_classes: character_classes.map(&:name)
-    )
+    }
   end
 end

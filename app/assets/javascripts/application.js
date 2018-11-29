@@ -16,34 +16,49 @@
 //= require_tree .
 
 $(document).ready(function() {
-  var search_timer;
+  var requestInProgress = false;
+  var requestPending = false;
+  var searchText;
 
   function getCSRFTokenValue() {
     return $("[name=csrf-token]").attr("content");
   }
 
-  function searchSpells(search_text) {
-    clearTimeout(search_timer);
+  function searchSpells(searchText) {
+    if (requestInProgress) {
+      requestPending = $(".js-spell-search").val();
+    } else {
+      makeAjaxRequest(searchText);
+    }
+  }
 
-    search_timer = setTimeout(function() {
-      var csrf_token = getCSRFTokenValue();
-      $.ajax({
-        url: "spells/search",
-        method: "POST",
-        data: {
-          search_text: search_text
-        },
-        beforeSend: function(xhr) {
-          xhr.setRequestHeader("X-CSRF-Token", csrf_token);
-        },
-        success: function(data) {
-          $(".js-spell-results").html(data);
-        },
-        error: function(data) {
-          console.log(data)
+  function makeAjaxRequest(searchText) {
+    requestInProgress = true;
+    var csrfToken = getCSRFTokenValue();
+
+    $.ajax({
+      url: "spells/search",
+      method: "POST",
+      data: {
+        search_text: searchText
+      },
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("X-CSRF-Token", csrfToken);
+      },
+      success: function(data) {
+        $(".js-spell-results").html(data);
+      },
+      error: function(data) {
+        console.log(data)
+      },
+      complete: function() {
+        requestInProgress = false;
+        if (requestPending) {
+          makeAjaxRequest(requestPending)
+          requestPending = false;
         }
-      });
-    }, 400);
+      }
+    });
   }
 
   $(".js-spell-search").on("keyup", function() {
@@ -51,11 +66,9 @@ $(document).ready(function() {
   });
 
   $(window).on("load", function() {
-    var search_text = $(".js-spell-search").val();
-    if (search_text) {
-      searchSpells(search_text);
+    var searchTimer = $(".js-spell-search").val();
+    if (searchTimer) {
+      searchSpells(searchTimer);
     }
   });
-
-
 });
